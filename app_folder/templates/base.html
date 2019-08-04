@@ -5,9 +5,21 @@
     </head>
     <body>
         <div>
-            My project:<a href="/index">home page</a>
+            Board:
+            <a href="{{ url_for('index') }}">Home</a>
+            <a href="{{ url_for('login') }}">Login</a>
         </div>
         <hr>
+        {% with flash_messages = get_flashed_messages() %}
+        {% if flash_messages %}
+        <ul>
+            {% for message in flash_messages %}
+            <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% endwith %}
+
         {% block content %}{% endblock %}
     </body>
 </html>
