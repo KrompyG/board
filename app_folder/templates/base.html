@@ -6,8 +6,8 @@
     <body>
         <div>
             Board:
-            <a href="{{ url_for('index') }}">Home</a>
-            <a href="{{ url_for('login') }}">Login</a>
+            <a href="{{ url_for('index') }}">На главную</a>
+            <a href="{{ url_for('login') }}">Авторизация</a>
         </div>
         <hr>
         {% with flash_messages = get_flashed_messages() %}
