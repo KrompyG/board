@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for
 from app_folder import app
-from app_folder.forms import Login_form, Add_product_form
+from app_folder.forms import Login_form, Add_product_form, Register_form
 
 @app.route('/')
 @app.route('/index')
@@ -24,5 +24,17 @@ def add_product():
         flash('New product {} added'.format(
             form.productname))
         return redirect(url_for('index'))
-    print(form.errors)
+    #print(form.errors)
     return render_template('add_product.html', form = form)
+
+@app.route('/register', methods=['GET','POST'])
+def register():
+    form = Register_form()
+    if form.validate_on_submit():
+        flash('New user {} registered, id_location = {}, remember_me = {}'.format(
+            form.username.data,
+            form.location.data,
+            form.remember_me.data
+        ))
+        return redirect(url_for('index'))
+    return render_template('register_form.html', form = form)
