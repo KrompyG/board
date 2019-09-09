@@ -5,13 +5,13 @@ from wtforms.fields import StringField, PasswordField, BooleanField, SubmitField
 from wtforms.validators import DataRequired, Required
 
 # Form for signing in
-class LoginForm(FlaskForm):
+class Login_form(FlaskForm):
     username = StringField('Логин', validators = [DataRequired()])
     password = PasswordField('Пароль', validators = [DataRequired()])
     remember_me = BooleanField('Запомнить меня')
     submit = SubmitField('Войти')
     
-class AddProductForm(FlaskForm):
+class Add_product_form(FlaskForm):
     categories = [(0, 'еда'),
                   (1, 'товары для дома'),
                   (2, 'одежда')]
@@ -20,4 +20,3 @@ class AddProductForm(FlaskForm):
     productname = StringField('Название продукта', validators = [DataRequired()])
     photo = FileField('Прикрепить фото')
     submit = SubmitField('Добавить товар')
-    

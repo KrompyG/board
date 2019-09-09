@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for
 from app_folder import app
-from app_folder.forms import LoginForm, AddProductForm
+from app_folder.forms import Login_form, Add_product_form
 
 @app.route('/')
 @app.route('/index')
@@ -10,7 +10,7 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()
+    form = Login_form()
     if form.validate_on_submit():
         flash('Login requested for user {}, remember_me={}'.format(
             form.username.data, form.remember_me.data))
@@ -19,7 +19,7 @@ def login():
 
 @app.route('/product', methods=['GET', 'POST'])
 def add_product():
-    form = AddProductForm()
+    form = Add_product_form()
     if form.validate_on_submit():
         flash('New product {} added'.format(
             form.productname))
