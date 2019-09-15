@@ -1,20 +1,36 @@
 from flask import render_template, flash, redirect, url_for
 from app_folder import app
 from app_folder.forms import Login_form, Add_product_form, Register_form
+from flask_login import current_user, login_user, logout_user, login_required
+from app_folder.models import User
+from flask import request
+from werkzeug.urls import url_parse
 
 @app.route('/')
 @app.route('/index')
+@login_required
 def index():
-    user = {'username': 'Maxim'}
-    return render_template('index.html', user = user)
+    return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # if authenticated user tries to login again
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     form = Login_form()
     if form.validate_on_submit():
-        flash('Login requested for user {}, remember_me={}'.format(
-            form.username.data, form.remember_me.data))
-        return redirect(url_for('index'))
+        user = User.query.filter_by(username = form.username.data).first()
+        # wrong user's data
+        if ((user is None) or not (user.check_password(form.password.data))):
+            flash('Неверный логин или пароль')
+            return redirect(url_for('login'))
+        # if everething is good
+        login_user(user, remember=form.remember_me.data)
+        next_page = request.args.get('next')
+        # if next_page does't exist or next_page has absolute path (unsecure)
+        if ((not next_page) or (url_parse(next_page).netloc != '')):
+            next_page = url_for('index')
+        return redirect(next_page)
     return render_template('login.html', form = form)
 
 @app.route('/product', methods=['GET', 'POST'])
@@ -38,3 +54,8 @@ def register():
         ))
         return redirect(url_for('index'))
     return render_template('register_form.html', form = form)
+
+@app.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index'))
