@@ -1,8 +1,11 @@
 # This file contains all forms
 
 from flask_wtf import FlaskForm
-from wtforms.fields import StringField, PasswordField, BooleanField, SubmitField, SelectField, FileField
-from wtforms.validators import DataRequired, Required
+from wtforms.fields import (StringField, PasswordField, BooleanField,
+                            SubmitField, SelectField, FileField)
+from wtforms.validators import (DataRequired, Required, ValidationError,
+                                Email, EqualTo)
+from app_folder.models import User
 
 # Form for signing in
 class Login_form(FlaskForm):
@@ -30,6 +33,18 @@ class Register_form(FlaskForm):
                 #get from db
     location = SelectField('Общежитие', choices = locations, validators = [Required()], coerce = int)
     username = StringField('Логин', validators = [DataRequired()])
+    email = StringField('email', validators = [DataRequired(), Email()])
     password = PasswordField('Пароль', validators = [DataRequired()])
+    repeat_password = PasswordField('Повторите пароль', validators = [DataRequired(), EqualTo('password')])
     remember_me = BooleanField('Запомнить меня')
     submit = SubmitField('Продолжить регистрацию')
+
+    def validate_username(self, username):
+        user = User.query.filter_by(username = username.data).first()
+        if user is not None:
+            raise ValidationError('Данное имя пользователя уже занято')
+
+    def validate_password(self, email):
+        user = User.query.filter_by(email = email.data).first()
+        if user is not None:
+            raise ValidationError('Данный email уже занят')

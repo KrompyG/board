@@ -5,6 +5,7 @@ from flask_login import current_user, login_user, logout_user, login_required
 from app_folder.models import User
 from flask import request
 from werkzeug.urls import url_parse
+from app_folder import db
 
 @app.route('/')
 @app.route('/index')
@@ -45,13 +46,17 @@ def add_product():
 
 @app.route('/register', methods=['GET','POST'])
 def register():
+    # if authenticated user tries to registrate again
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
     form = Register_form()
     if form.validate_on_submit():
-        flash('New user {} registered, id_location = {}, remember_me = {}'.format(
-            form.username.data,
-            form.location.data,
-            form.remember_me.data
-        ))
+        user = User(username = form.username.data, email = form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Вы успешно зарегистрированы!')
+        login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
     return render_template('register_form.html', form = form)
 
