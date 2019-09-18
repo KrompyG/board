@@ -9,6 +9,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(64), index=True, unique = True)
     email = db.Column(db.String(120), index=True, unique = True)
     password_hash = db.Column(db.String(128))
+    # location = many to many relationship
     products = db.relationship('Product', backref = 'owner', lazy = 'dynamic')
 
     def __repr__ (self):
@@ -25,6 +26,7 @@ class Product(db.Model):
     name = db.Column(db.String(64))
     timestamp = db.Column(db.DateTime, index = True, default = datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
 
     def __repr__(self):
         return '<Product {}>'.format(self.name)
@@ -33,3 +35,18 @@ class Product(db.Model):
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), index=True)
+    products = db.relationship('Product', backref='category', lazy='dynamic')
+
+    def __repr__(self):
+        return '<Category {}>'.format(self.name)
+
+'''
+class Location(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64))
+    # users = many to many relationship
+'''
