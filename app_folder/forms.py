@@ -5,7 +5,7 @@ from wtforms.fields import (StringField, PasswordField, BooleanField,
                             SubmitField, SelectField, FileField)
 from wtforms.validators import (DataRequired, Required, ValidationError,
                                 Email, EqualTo)
-from app_folder.models import User, Category
+from app_folder.models import User, Category, Location
 
 # Form for signing in
 class Login_form(FlaskForm):
@@ -23,13 +23,8 @@ class Add_product_form(FlaskForm):
     submit = SubmitField('Добавить товар')
 
 class Register_form(FlaskForm):
-    locations = [(0, 'обжага, общажка, общажечка'),
-                (1, '1-я Синичкина д.3 к.1А'),
-                (2, '1-я Синичкина д.3 к.1'),
-                (3, 'Энергетическая д.10'),
-                (4, 'Энергетическая д.14'),
-                (5, 'Энергетическая д.18')]
-                #get from db
+    locations = [(l.id, l.name) for l in Location.query.all()]
+    locations.insert(0, (0, 'обжага, общажка, общажечка'))
     location = SelectField('Общежитие', choices = locations, validators = [Required()], coerce = int)
     username = StringField('Логин', validators = [DataRequired()])
     email = StringField('email', validators = [DataRequired(), Email()])

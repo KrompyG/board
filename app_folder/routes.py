@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for
 from app_folder import app
 from app_folder.forms import Login_form, Add_product_form, Register_form
 from flask_login import current_user, login_user, logout_user, login_required
-from app_folder.models import User
+from app_folder.models import User, Product
 from flask import request
 from werkzeug.urls import url_parse
 from app_folder import db
@@ -38,8 +38,13 @@ def login():
 def add_product():
     form = Add_product_form()
     if form.validate_on_submit():
-        flash('New product {} added'.format(
-            form.productname))
+        product = Product(name = form.productname.data,
+                          category_id = form.category.data,
+                          user_id = current_user.id)
+        db.session.add(product)
+        db.session.commit()
+        flash('Новый продукт {} успешно добавлен!'.format(
+            form.productname.data))
         return redirect(url_for('index'))
     #print(form.errors)
     return render_template('add_product.html', form = form)
@@ -51,7 +56,8 @@ def register():
         return redirect(url_for('index'))
     form = Register_form()
     if form.validate_on_submit():
-        user = User(username = form.username.data, email = form.email.data)
+        user = User(username = form.username.data, email = form.email.data,
+                    location_id = form.location.data)
         user.set_password(form.password.data)
         db.session.add(user)
         db.session.commit()
