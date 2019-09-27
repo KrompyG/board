@@ -70,3 +70,9 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+@app.route('/my_offers', methods=['GET', 'POST'])
+@login_required
+def get_my_products():
+    offers = Product.query.filter_by(owner = current_user).order_by(Product.category_id.asc())
+    return render_template('my_offers.html', offers = offers)
