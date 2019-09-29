@@ -5,6 +5,9 @@
     <hr>
     {% for o in offers %}
     <p>[{{ o.category.name }}] - [{{ o.name }}] - [{{ o.timestamp }}]</p>
+    {% if o.path_to_photo %}
+    <img src="{{ o.path_to_photo }}" alt="{{ o.name }}">
+    {% endif %}
     {% endfor %}
     <hr>
     <p><a href="{{ url_for('add_product') }}">Добавить новый продукт</a></p>

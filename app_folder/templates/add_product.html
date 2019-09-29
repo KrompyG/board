@@ -2,7 +2,7 @@
 
 {% block content %}
     <h1>Добавление товара</h1>
-    <form action="" method="POST" novalidate>
+    <form action="" method="POST" enctype="multipart/form-data" novalidate>
         {{ form.hidden_tag }}
         {{ form.csrf_token }}
         <p>
