@@ -2,7 +2,8 @@ import os
 import uuid
 from flask import render_template, flash, redirect, url_for, request
 from app_folder import app
-from app_folder.forms import Login_form, Add_product_form, Register_form
+from app_folder.forms import (Login_form, Add_product_form, Register_form,
+                              Search_form)
 from flask_login import current_user, login_user, logout_user, login_required
 from app_folder.models import User, Product
 from werkzeug.urls import url_parse
@@ -92,3 +93,14 @@ def logout():
 def my_offers():
     offers = Product.query.filter_by(owner = current_user).order_by(Product.category_id.asc())
     return render_template('my_offers.html', offers = offers)
+
+@app.route('/search', methods=['GET','POST'])
+def search_product():
+    form = Search_form()
+    if form.validate_on_submit():        
+        products = Product.query.join(Product.owner).filter((Product.category != None) if (form.category.data == 0) else (Product.category_id == form.category.data),
+                                        (User.location_id != None) if (form.location.data == 0) else (User.location_id == form.location.data),
+                                        (Product.name != None) if (form.productname.data == '') else (Product.name == form.productname.data))
+        return render_template('search_form.html', products = products.all(), form = form)
+    products = Product.query.all()
+    return render_template('search_form.html', products = products, form = form)

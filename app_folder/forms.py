@@ -42,3 +42,13 @@ class Register_form(FlaskForm):
         user = User.query.filter_by(email = email.data).first()
         if user is not None:
             raise ValidationError('Данный email уже занят')
+
+class Search_form(FlaskForm):
+    categories = [(c.id, c.name) for c in Category.query.all()]
+    categories.insert(0, (0, 'Выберите категорию'))
+    category = SelectField('Категория', choices = categories, coerce = int)
+    locations = [(l.id, l.name) for l in Location.query.all()]
+    locations.insert(0, (0, 'обжага, общажка, общажечка'))
+    location = SelectField('Общежитие', choices = locations, coerce = int)
+    productname = StringField('Название')
+    submit = SubmitField('Найти')

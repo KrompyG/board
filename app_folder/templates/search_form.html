@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Поиск товара</h1>
+    <form action="" method="POST" novalidate>
+        {{ form.hidden_tag }}
+        {{ form.csrf_token }}
+            <div>
+                {{ form.category }}
+                {{ form.name }}
+                {{ form.location }}
+                {{ form.productname(size = 32) }}
+                {{ form.submit }}
+            </div>
+            <hr>
+            {% for p in products %}
+                <p>[{{ p.category.name }}] - [{{ p.name }}] - [{{ p.timestamp }}]</p>
+                {% if p.path_to_photo %}
+                    <img src="{{ p.path_to_photo }}" alt="{{ p.name }}">
+                {% endif %}
+            {% endfor %}
+            <hr>
+    </form>
+{% endblock %}
