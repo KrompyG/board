@@ -56,7 +56,7 @@ def add_product():
             photo_path = os.path.join('static', 'img', 'products',
                                       str(uuid.uuid4().hex) + '.' + extension)
             photo.save(os.path.join(app.config['BASEDIR'], 'app_folder', photo_path))
-            product.path_to_photo = photo_path
+            product.path_to_photo = '\\' + photo_path
 
         db.session.add(product)
         db.session.commit()
@@ -98,9 +98,19 @@ def my_offers():
 def search_product():
     form = Search_form()
     if form.validate_on_submit():        
-        products = Product.query.join(Product.owner).filter((Product.category != None) if (form.category.data == 0) else (Product.category_id == form.category.data),
-                                        (User.location_id != None) if (form.location.data == 0) else (User.location_id == form.location.data),
-                                        (Product.name != None) if (form.productname.data == '') else (Product.name == form.productname.data))
+        products = Product.query.join(Product.owner).filter(
+            (Product.category != None) if (form.category.data == 0) else (Product.category_id == form.category.data),
+            (User.location_id != None) if (form.location.data == 0) else (User.location_id == form.location.data),
+            (Product.name != None) if (form.productname.data == '') else (Product.name == form.productname.data)
+        )
         return render_template('search_form.html', products = products.all(), form = form)
     products = Product.query.all()
     return render_template('search_form.html', products = products, form = form)
+
+@app.route('/product/<product_id>')
+def show_product(product_id):
+    product = Product.query.filter_by(id = product_id).first()
+    owner = product.owner
+    return render_template('product_page.html',
+                            p = product,
+                            owner = owner)

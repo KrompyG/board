@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Продукт {{ p.name }} пользователя {{ owner.username }}</h1>
+    <div>
+        <p>[{{ p.category.name }}] - [{{ p.name }}] - [{{ p.timestamp }}]</p>
+            {% if p.path_to_photo %}
+                <img src="{{ p.path_to_photo }}" alt="{{ p.name }}">
+            {% endif %}
+    </div>
+{% endblock %}
