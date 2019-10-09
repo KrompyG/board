@@ -4,8 +4,8 @@
     <h1>Продукт {{ product.name }} пользователя {{product.owner.username }}</h1>
     <div>
         <p>[{{ product.category.name }}] - [{{ product.name }}] - [{{ product.timestamp }}]</p>
-            {% if product.path_to_photo %}
-                <img src="{{ product.path_to_photo }}" alt="{{ product.name }}">
+            {% if product.photo_name %}
+                <img src="{{ get_path(product.photo_name) }}" alt="{{ product.name }}">
             {% endif %}
     </div>
 {% endblock %}

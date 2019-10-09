@@ -8,3 +8,6 @@ class Dev_config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     BASEDIR = basedir
     ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+    STATIC_FOLDER = os.path.join(BASEDIR, 'app_folder', 'static')
+    PRODUCT_PHOTO_FOLDER = os.path.join(STATIC_FOLDER, 'img', 'products')
+

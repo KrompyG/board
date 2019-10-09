@@ -16,8 +16,8 @@
             {% for p in products %}
                 <div onclick="window.location=`{{ url_for('show_product', product_id = p.id) }}`">
                     <p>[{{ p.category.name }}] - [{{ p.name }}] - [{{ p.timestamp }}]</p>
-                    {% if p.path_to_photo %}
-                        <img src="{{ p.path_to_photo }}" alt="{{ p.name }}">
+                    {% if p.photo_name %}
+                        <img src="{{ get_path(p.photo_name) }}" alt="{{ p.name }}">
                     {% endif %}
                 </div>
             {% endfor %}

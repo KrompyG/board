@@ -15,6 +15,9 @@ def allowed_file(filename):
     return ('.' in filename and
             filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS'])
 
+def form_photo_path(photoname):
+    return os.path.join('\\static', 'img', 'products', photoname)
+
 @app.route('/')
 @app.route('/index')
 @login_required
@@ -54,11 +57,11 @@ def add_product():
         photo = form.photo.data
         # creating folders if needed
         if photo and allowed_file(photo.filename):
+            # forming new unique name for product photo
             extension = photo.filename.rsplit('.', 1)[1]
-            photo_path = os.path.join('static', 'img', 'products',
-                                      str(uuid.uuid4().hex) + '.' + extension)
-            photo.save(os.path.join(app.config['BASEDIR'], 'app_folder', photo_path))
-            product.path_to_photo = '\\' + photo_path
+            photo_uid_name = str(uuid.uuid4().hex) + '.' + extension
+            photo.save(os.path.join(app.config['PRODUCT_PHOTO_FOLDER'], photo_uid_name))
+            product.photo_name = photo_uid_name
 
         db.session.add(product)
         db.session.commit()
@@ -93,8 +96,8 @@ def logout():
 @app.route('/my_offers', methods=['GET', 'POST'])
 @login_required
 def my_offers():
-    offers = Product.query.filter_by(owner = current_user).order_by(Product.category_id.asc())
-    return render_template('my_offers.html', offers = offers)
+    products = Product.query.filter_by(owner = current_user).order_by(Product.category_id.asc())
+    return render_template('my_offers.html', products = products, get_path = form_photo_path)
 
 @app.route('/search', methods=['GET','POST'])
 def search_product():
@@ -105,14 +108,17 @@ def search_product():
             (User.location_id != None) if (form.location.data == 0) else (User.location_id == form.location.data),
             (Product.name != None) if (form.productname.data == '') else (Product.name == form.productname.data)
         )
-        return render_template('search_form.html', products = products.all(), form = form)
+        return render_template('search_form.html', products = products.all(),
+                                form = form, get_path = form_photo_path)
     products = Product.query.all()
-    return render_template('search_form.html', products = products, form = form)
+    return render_template('search_form.html', products = products,
+                            form = form, get_path = form_photo_path)
 
 @app.route('/product/<product_id>')
 def show_product(product_id):
     product = Product.query.filter_by(id = product_id).first()
-    return render_template('product_page.html', product = product)
+    return render_template('product_page.html', product = product,
+                            get_path = form_photo_path)
 
 #TODO make another version of photo path
 @app.route('/edit_product/<product_id>', methods=['GET', 'POST'])
@@ -129,18 +135,16 @@ def edit_product(product_id):
             # validatig photo
             if new_photo and allowed_file(new_photo.filename):
                 extension = new_photo.filename.rsplit('.', 1)[1]
-                new_photo_path = os.path.join('static', 'img', 'products',
-                                      str(uuid.uuid4().hex) + '.' + extension)
-                new_photo.save(os.path.join(app.config['BASEDIR'], 'app_folder', new_photo_path))
+                new_photo_uid_name = str(uuid.uuid4().hex) + '.' + extension
+                new_photo.save(os.path.join(app.config['PRODUCT_PHOTO_FOLDER'], new_photo_uid_name))
                 # checking that product has path_to_photo
-                if product.path_to_photo is not None:
-                    old_photo_path = product.path_to_photo.lstrip('\\')
-                    old_photo_path = os.path.join(app.config['BASEDIR'], 'app_folder', old_photo_path)
+                if product.photo_name is not None:
+                    old_photo_path = os.path.join(app.config['PRODUCT_PHOTO_FOLDER'], product.photo_name)
                     # deleting old photo
                     if (os.path.exists(old_photo_path)):
                         os.remove(old_photo_path)
                 # writing path to the new photo
-                product.path_to_photo = '\\' + new_photo_path
+                product.photo_name = new_photo_uid_name
         
             db.session.commit()
             flash('Изменения информации о продукте {} сохранены!'.format(
@@ -149,5 +153,6 @@ def edit_product(product_id):
         elif request.method == 'GET':
             form.productname.data = product.name
             form.category.data = product.category_id
-        return render_template('edit_product.html', form = form, product = product)
+        return render_template('edit_product.html', form = form, product = product,
+                                get_path = form_photo_path)
     return redirect(url_for('show_product', product_id = product_id))
