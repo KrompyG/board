@@ -16,7 +16,7 @@ class Login_form(FlaskForm):
     
 class Add_product_form(FlaskForm):
     categories = [(c.id, c.name) for c in Category.query.all()]
-    categories.insert(0, (0, 'выберите товар'))
+    categories.insert(0, (0, 'Выберите категорию'))
     category = SelectField('Категория товара', choices = categories, validators = [Required()], coerce = int)
     productname = StringField('Название продукта', validators = [DataRequired()])
     photo = FileField('Прикрепить фото')

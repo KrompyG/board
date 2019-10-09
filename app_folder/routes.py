@@ -42,6 +42,7 @@ def login():
         return redirect(next_page)
     return render_template('login.html', form = form)
 
+#TODO make another version of photo path
 @app.route('/product', methods=['GET', 'POST'])
 def add_product():
     form = Add_product_form()
@@ -51,6 +52,7 @@ def add_product():
                           user_id = current_user.id)
 
         photo = form.photo.data
+        # creating folders if needed
         if photo and allowed_file(photo.filename):
             extension = photo.filename.rsplit('.', 1)[1]
             photo_path = os.path.join('static', 'img', 'products',
@@ -110,7 +112,42 @@ def search_product():
 @app.route('/product/<product_id>')
 def show_product(product_id):
     product = Product.query.filter_by(id = product_id).first()
-    owner = product.owner
-    return render_template('product_page.html',
-                            p = product,
-                            owner = owner)
+    return render_template('product_page.html', product = product)
+
+#TODO make another version of photo path
+@app.route('/edit_product/<product_id>', methods=['GET', 'POST'])
+@login_required
+def edit_product(product_id):
+    # for editing product Add_product_form could be used
+    form = Add_product_form()
+    product = Product.query.filter_by(id = product_id).first()
+    if product.owner == current_user:
+        if form.validate_on_submit():
+            product.name = form.productname.data
+            product.category_id = form.category.data
+            new_photo = form.photo.data
+            # validatig photo
+            if new_photo and allowed_file(new_photo.filename):
+                extension = new_photo.filename.rsplit('.', 1)[1]
+                new_photo_path = os.path.join('static', 'img', 'products',
+                                      str(uuid.uuid4().hex) + '.' + extension)
+                new_photo.save(os.path.join(app.config['BASEDIR'], 'app_folder', new_photo_path))
+                # checking that product has path_to_photo
+                if product.path_to_photo is not None:
+                    old_photo_path = product.path_to_photo.lstrip('\\')
+                    old_photo_path = os.path.join(app.config['BASEDIR'], 'app_folder', old_photo_path)
+                    # deleting old photo
+                    if (os.path.exists(old_photo_path)):
+                        os.remove(old_photo_path)
+                # writing path to the new photo
+                product.path_to_photo = '\\' + new_photo_path
+        
+            db.session.commit()
+            flash('Изменения информации о продукте {} сохранены!'.format(
+                  form.productname.data))
+            return redirect(url_for('show_product', product_id = product_id))
+        elif request.method == 'GET':
+            form.productname.data = product.name
+            form.category.data = product.category_id
+        return render_template('edit_product.html', form = form, product = product)
+    return redirect(url_for('show_product', product_id = product_id))

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Продукт {{ product.name }}</h1>
+    <form action="" method="POST" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag }}
+        {{ form.csrf_token }}
+        <p>
+            {{ form.productname.label }}<br>
+            {{ form.productname(size = 32)}}<br>
+            {% for error in form.productname.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>
+            {{ form.category.label }}<br>
+            {{ form.category() }}<br>
+            {% for error in form.category.errors %}
+            <span style="color: red;">[{{ error }}]</span>
+            {% endfor %}
+        </p>
+        <p>{{ form.photo() }} {{ form.photo.label }}</p>
+        <p>{{ form.submit() }}</p>
+    
+    </form>        
+
+    {% if product.path_to_photo %}
+        <img src="{{ product.path_to_photo }}" alt="{{ product.name }}">
+    {% endif %}
+
+
+{% endblock %}
