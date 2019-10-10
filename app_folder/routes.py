@@ -9,14 +9,12 @@ from app_folder.models import User, Product
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from app_folder import db
+from config import form_photo_path
 
 # checking file's extension
 def allowed_file(filename):
     return ('.' in filename and
             filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS'])
-
-def form_photo_path(photoname):
-    return os.path.join('\\static', 'img', 'products', photoname)
 
 @app.route('/')
 @app.route('/index')

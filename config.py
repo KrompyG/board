@@ -9,5 +9,12 @@ class Dev_config(object):
     BASEDIR = basedir
     ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
     STATIC_FOLDER = os.path.join(BASEDIR, 'app_folder', 'static')
+    # if you want to change product photo folder
+    # you have to change
+    # 0) PRODUCT_PHOTO_FOLDER
+    # 1) form_photo_path(photoname) function
     PRODUCT_PHOTO_FOLDER = os.path.join(STATIC_FOLDER, 'img', 'products')
 
+# forming photo_path for passing it into template
+def form_photo_path(photoname):
+    return os.path.join('\\static', 'img', 'products', photoname)
