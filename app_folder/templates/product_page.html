@@ -7,5 +7,16 @@
             {% if product.photo_name %}
                 <img src="{{ get_path(product.photo_name) }}" alt="{{ product.name }}">
             {% endif %}
+            <div>
+                {% if current_user == product.owner %}
+                    <a href="{{ url_for('edit_product', product_id = product.id) }}">
+                        Редактировать
+                    </a>
+                {% elif not current_user.is_anonymous %}
+                    <a href="{{ url_for('index') }}">Забронировать</a>
+                {% else %}
+                    Чтобы забронировать <a href="{{ url_for('login') }}">авторизуйтесь!</a>
+                {% endif %}
+            </div>
     </div>
 {% endblock %}
