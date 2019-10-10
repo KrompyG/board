@@ -1,5 +1,4 @@
 import os
-import uuid
 from flask import render_template, flash, redirect, url_for, request
 from app_folder import app
 from app_folder.forms import (Login_form, Add_product_form, Register_form,
@@ -9,7 +8,7 @@ from app_folder.models import User, Product
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from app_folder import db
-from config import form_photo_path
+from app_folder.utilits import form_photo_path
 
 # checking file's extension
 def allowed_file(filename):
@@ -51,15 +50,7 @@ def add_product():
         product = Product(name = form.productname.data,
                           category_id = form.category.data,
                           user_id = current_user.id)
-
-        photo = form.photo.data
-        # creating folders if needed
-        if photo and allowed_file(photo.filename):
-            # forming new unique name for product photo
-            extension = photo.filename.rsplit('.', 1)[1]
-            photo_uid_name = str(uuid.uuid4().hex) + '.' + extension
-            photo.save(os.path.join(app.config['PRODUCT_PHOTO_FOLDER'], photo_uid_name))
-            product.photo_name = photo_uid_name
+        product.add_photo(form.photo.data)
 
         db.session.add(product)
         db.session.commit()
@@ -129,20 +120,7 @@ def edit_product(product_id):
         if form.validate_on_submit():
             product.name = form.productname.data
             product.category_id = form.category.data
-            new_photo = form.photo.data
-            # validatig photo
-            if new_photo and allowed_file(new_photo.filename):
-                extension = new_photo.filename.rsplit('.', 1)[1]
-                new_photo_uid_name = str(uuid.uuid4().hex) + '.' + extension
-                new_photo.save(os.path.join(app.config['PRODUCT_PHOTO_FOLDER'], new_photo_uid_name))
-                # checking that product has path_to_photo
-                if product.photo_name is not None:
-                    old_photo_path = os.path.join(app.config['PRODUCT_PHOTO_FOLDER'], product.photo_name)
-                    # deleting old photo
-                    if (os.path.exists(old_photo_path)):
-                        os.remove(old_photo_path)
-                # writing path to the new photo
-                product.photo_name = new_photo_uid_name
+            product.replace_photo(form.photo.data)
         
             db.session.commit()
             flash('Изменения информации о продукте {} сохранены!'.format(

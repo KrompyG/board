@@ -1,8 +1,12 @@
+import os
+import uuid
+from app_folder import app
 from datetime import datetime
 from app_folder import db
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from app_folder import login
+from app_folder.utilits import allowed_file
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -35,6 +39,41 @@ class Product(db.Model):
     def __repr__(self):
         return '<Product {}>'.format(self.name)
 
+    # deleting current product photo
+    def delete_photo(self):
+        if self.photo_name is not None:
+            photo_path = os.path.join(app.config['PRODUCT_PHOTO_FOLDER'], self.photo_name)
+            # deleting photo
+            if (os.path.exists(photo_path)):
+                os.remove(photo_path)
+            self.photo_name = ''
+        return
+
+    # adding new product photo
+    def add_photo(self, photo):
+        if photo and allowed_file(photo.filename):
+            # forming new unique name for product photo
+            extension = photo.filename.rsplit('.', 1)[1]
+            photo_uid_name = str(uuid.uuid4().hex) + '.' + extension
+            photo.save(os.path.join(app.config['PRODUCT_PHOTO_FOLDER'], photo_uid_name))
+            self.photo_name = photo_uid_name
+            return True
+        else:
+            return False
+
+    # replacing current product photo with new one
+    def replace_photo(self, photo):
+        if photo and allowed_file(photo.filename):
+            # forming new unique name for product photo
+            extension = photo.filename.rsplit('.', 1)[1]
+            photo_uid_name = str(uuid.uuid4().hex) + '.' + extension
+            photo.save(os.path.join(app.config['PRODUCT_PHOTO_FOLDER'], photo_uid_name))
+            self.delete_photo()
+            self.photo_name = photo_uid_name
+            return True
+        else:
+            return False        
+    
 # for flask_login
 @login.user_loader
 def load_user(id):

@@ -12,9 +12,5 @@ class Dev_config(object):
     # if you want to change product photo folder
     # you have to change
     # 0) PRODUCT_PHOTO_FOLDER
-    # 1) form_photo_path(photoname) function
+    # 1) form_photo_path(photoname) function (utilits.py)
     PRODUCT_PHOTO_FOLDER = os.path.join(STATIC_FOLDER, 'img', 'products')
-
-# forming photo_path for passing it into template
-def form_photo_path(photoname):
-    return os.path.join('\\static', 'img', 'products', photoname)
