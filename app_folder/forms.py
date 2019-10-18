@@ -27,18 +27,15 @@ class Register_form(FlaskForm):
     locations.insert(0, (0, 'обжага, общажка, общажечка'))
     location = SelectField('Общежитие', choices = locations, validators = [Required()], coerce = int)
     username = StringField('Логин', validators = [DataRequired()])
+    first_name = StringField('Имя', validators = [DataRequired()])
+    last_name = StringField('Фамилия', validators = [DataRequired()])
     email = StringField('email', validators = [DataRequired(), Email()])
     password = PasswordField('Пароль', validators = [DataRequired()])
     repeat_password = PasswordField('Повторите пароль', validators = [DataRequired(), EqualTo('password')])
     remember_me = BooleanField('Запомнить меня')
     submit = SubmitField('Продолжить регистрацию')
 
-    def validate_username(self, username):
-        user = User.query.filter_by(username = username.data).first()
-        if user is not None:
-            raise ValidationError('Данное имя пользователя уже занято')
-
-    def validate_password(self, email):
+    def validate_email(self, email):
         user = User.query.filter_by(email = email.data).first()
         if user is not None:
             raise ValidationError('Данный email уже занят')
