@@ -14,3 +14,6 @@ class Dev_config(object):
     # 0) PRODUCT_PHOTO_FOLDER
     # 1) form_photo_path(photoname) function (utilits.py)
     PRODUCT_PHOTO_FOLDER = os.path.join(STATIC_FOLDER, 'img', 'products')
+    APP_ID = '7174211'
+    PROTECTED_KEY = 'LULoGsnEBXDPpOhr7kIR'
+

@@ -1,4 +1,4 @@
-import os
+import os, requests
 from flask import render_template, flash, redirect, url_for, request
 from app_folder import app
 from app_folder.forms import (Login_form, Add_product_form, Register_form,
@@ -19,7 +19,12 @@ def allowed_file(filename):
 @app.route('/index')
 @login_required
 def index():
-    return render_template('index.html')
+    url = 'http://oauth.vk.com/authorize?client_id={}&client_secret={}&v=5.102&response_type=code&redirect_uri={}&scope=email'.format(
+                app.config['APP_ID'],
+                app.config['PROTECTED_KEY'],
+                'http://localhost:5000/vk_login' #temporarily can't use url_for()
+             )
+    return render_template('index.html', vk_url = url)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -132,3 +137,32 @@ def edit_product(product_id):
         return render_template('edit_product.html', form = form, product = product,
                                 get_path = form_photo_path)
     return redirect(url_for('show_product', product_id = product_id))
+
+
+@app.route('/vk_login')
+def vk_login():
+    code = request.args.get('code')
+    if code:
+        url_for_tocken = 'https://oauth.vk.com/access_token?client_id={}&client_secret={}&redirect_uri={}&code={}'.format(
+                     app.config['APP_ID'],
+                     app.config['PROTECTED_KEY'],
+                     'http://localhost:5000/vk_login', #temporarily can't use url_for()
+                     code
+                 )
+        response = requests.get(url_for_tocken).json()
+        token = response.get('access_token')
+        user_id = response.get('user_id')
+        email = response.get('email')
+        
+        
+        url_for_info = 'https://api.vk.com/method/users.get?user_id={}&access_token={}&v=5.102'.format(user_id, token)
+        response_dict = requests.get(url_for_info).json().get('response')[0] # response dict with args
+        first_name = response_dict.get('first_name')
+        last_name = response_dict.get('last_name')
+
+        if email != None:
+            return last_name + ' ' + first_name + ' email=' + str(email)
+        else:
+            return last_name + ' ' + first_name
+    return 'Что-то пошло не так...'
+    
