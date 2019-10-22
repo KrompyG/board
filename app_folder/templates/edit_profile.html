@@ -43,5 +43,14 @@
         <p>
             {{ form.submit() }}
         </p>
+        {% if current_user.vk_id == None %}
+            <div>
+                <a href="{{ 'http://oauth.vk.com/authorize?client_id={}&client_secret={}&v=5.102&response_type=code&redirect_uri={}&scope=email'.format(
+                        app.config['APP_ID'],
+                        app.config['PROTECTED_KEY'],
+                        'http://localhost:5000/add_vk_id'
+                 ) }}">Добавить аккаунт Вконтакте</a>
+            </div>
+        {% endif %}
     </form>
 {% endblock %}

@@ -9,6 +9,7 @@ from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from app_folder import db
 from app_folder.utilits import form_photo_path
+from sqlalchemy.exc import IntegrityError
 
 
 # checking file's extension
@@ -209,5 +210,34 @@ def edit_profile():
         form.last_name.data = current_user.last_name
         form.email.data = current_user.email
         form.location.data = current_user.location_id
-    print(form.errors)
-    return render_template('edit_profile.html', form = form)
+    return render_template('edit_profile.html', form = form, app = app)
+
+
+@app.route('/add_vk_id')
+@login_required
+def add_vk_id():
+    if current_user.vk_id is not None:
+        return redirect(url_for('index'))
+    code = request.args.get('code')
+    if code:
+        url_for_tocken = 'https://oauth.vk.com/access_token?client_id={}&client_secret={}&redirect_uri={}&code={}'.format(
+                     app.config['APP_ID'],
+                     app.config['PROTECTED_KEY'],
+                     'http://localhost:5000/add_vk_id', #temporarily can't use url_for()
+                     code
+                 )
+        response = requests.get(url_for_tocken).json()
+        token = response.get('access_token')
+        user_vk_id = response.get('user_id')
+        try:
+            current_user.vk_id = user_vk_id
+            db.session.commit()
+            flash('Аккаунт Вконтакте успешно добавлен')
+            return redirect(url_for('index'))
+        except IntegrityError as e:
+            flash('Этот аккаунт VK уже используется')
+            return redirect(url_for('index'))
+        else:
+            pass
+    flash('Что-то пошло не так...')
+    return redirect(url_for('index'))
