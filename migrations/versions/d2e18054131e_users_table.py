@@ -24,15 +24,14 @@ def upgrade():
     sa.PrimaryKeyConstraint('id')
     )
     
-
     op.create_table('user',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('username', sa.Integer(), nullable=True)
+    sa.Column('username', sa.Integer(), nullable=True),
     sa.Column('first_name', sa.String(length=64), nullable=True),
     sa.Column('last_name', sa.String(length=64), nullable=True),
     sa.Column('email', sa.String(length=120), nullable=True),
     sa.Column('password_hash', sa.String(length=128), nullable=True),
-    sa.Column('vk_id', sa.Integer(), nullable=True)
+    sa.Column('vk_id', sa.Integer(), nullable=True),
     sa.Column('location_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['location_id'], ['location.id']),
     sa.PrimaryKeyConstraint('id'),
