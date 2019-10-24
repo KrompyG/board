@@ -8,6 +8,7 @@ from flask_login import UserMixin
 from app_folder import login
 from app_folder.utilits import allowed_file
 
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(64), unique = True)
@@ -18,8 +19,8 @@ class User(UserMixin, db.Model):
     vk_id = db.Column(db.Integer, unique = True)
     location_id = db.Column(db.Integer, db.ForeignKey('location.id'))
     location = db.relationship('Location', backref = 'inhabitants')
-
     products = db.relationship('Product', backref = 'owner', lazy = 'dynamic')
+    messages = db.relationship('Message', backref = 'author')
 
     def __repr__ (self):
         return '<User {} {} {}>'.format(self.first_name, self.last_name, self.username)
@@ -30,6 +31,7 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
 
+
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(64))
@@ -38,6 +40,7 @@ class Product(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     category = db.relationship('Category')
+    dialogs = db.relationship('Dialog', backref = 'theme')
 
     def __repr__(self):
         return '<Product {}>'.format(self.name)
@@ -76,11 +79,13 @@ class Product(db.Model):
             return True
         else:
             return False        
-    
+
+
 # for flask_login
 @login.user_loader
 def load_user(id):
     return User.query.get(int(id))
+
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -89,9 +94,30 @@ class Category(db.Model):
     def __repr__(self):
         return '<Category {}>'.format(self.name)
 
+
 class Location(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(64))
 
     def __repr__(self):
         return '<Location {}>'.format(self.name)
+
+
+class Dialog(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
+    timestamp = db.Column(db.DateTime, default = datetime.utcnow)
+    
+    def __repr__(self):
+        return '<Dialog about product with id={}'.format(self.product_id)
+
+
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    dialog_id = db.Column(db.Integer, db.ForeignKey('dialog.id'), index=True)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    body = db.Column(db.String(256))
+    timestamp = db.Column(db.DateTime, default = datetime.utcnow)
+
+    def __repr__(self):
+        return '<Message from user with id={} in {}>'.format(self.author_id, self.timestamp)
