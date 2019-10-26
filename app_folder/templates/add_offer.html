@@ -1,7 +1,7 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
 
 {% block content %}
-    <h1>Продукт {{ product.name }}</h1>
+    <h1>Добавление предложения товара</h1>
     <form action="" method="POST" enctype="multipart/form-data" novalidate>
         {{ form.hidden_tag }}
         {{ form.csrf_token }}
@@ -19,17 +19,7 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
-        <!--has_photo will be in product object-->
-        {% if has_photo %}
-            <p>{{ form.photo() }} {{ form.photo.label }}</p>
-        {% endif %}
+        <p>{{ form.photo() }} {{ form.photo.label }}</p>
         <p>{{ form.submit() }}</p>
-    
-    </form>        
-
-    {% if product.photo_name %}
-        <img src="{{ get_path(product.photo_name) }}" alt="{{ product.name }}">
-    {% endif %}
-
-
+    </form>
 {% endblock %}

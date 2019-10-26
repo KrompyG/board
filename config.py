@@ -16,4 +16,5 @@ class Dev_config(object):
     PRODUCT_PHOTO_FOLDER = os.path.join(STATIC_FOLDER, 'img', 'products')
     APP_ID = '7174211'
     PROTECTED_KEY = 'LULoGsnEBXDPpOhr7kIR'
-
+    OFFER_STATUS = 1
+    REQUEST_STATUS = 2

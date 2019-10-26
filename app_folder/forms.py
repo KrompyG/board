@@ -17,7 +17,15 @@ class Login_form(FlaskForm):
     submit = SubmitField('Войти')
 
 
-class Add_product_form(FlaskForm):
+class Add_request_form(FlaskForm):
+    categories = [(c.id, c.name) for c in Category.query.all()]
+    categories.insert(0, (0, 'Выберите категорию'))
+    category = SelectField('Категория товара', choices = categories, validators = [Required()], coerce = int)
+    productname = StringField('Название продукта', validators = [DataRequired()])
+    submit = SubmitField('Добавить товар')
+
+
+class Add_offer_form(FlaskForm):
     categories = [(c.id, c.name) for c in Category.query.all()]
     categories.insert(0, (0, 'Выберите категорию'))
     category = SelectField('Категория товара', choices = categories, validators = [Required()], coerce = int)
@@ -56,6 +64,15 @@ class Search_form(FlaskForm):
     submit = SubmitField('Найти')
 
 
+class Edit_product_form(FlaskForm):
+    categories = [(c.id, c.name) for c in Category.query.all()]
+    categories.insert(0, (0, 'Выберите категорию'))
+    category = SelectField('Категория товара', choices = categories, validators = [Required()], coerce = int)
+    productname = StringField('Название продукта', validators = [DataRequired()])
+    photo = FileField('Прикрепить фото')
+    submit = SubmitField('Сохранить изменения')
+
+
 class Edit_profile_form(FlaskForm):
     locations = [(l.id, l.name) for l in Location.query.all()]
     locations.insert(0, (0, 'обжага, общажка, общажечка'))
@@ -64,10 +81,6 @@ class Edit_profile_form(FlaskForm):
     first_name = StringField('Имя', validators = [DataRequired()])
     last_name = StringField('Фамилия', validators = [DataRequired()])
     email = StringField('email', validators = [DataRequired(), Email()])
-    #old_password = PasswordField('Старый пароль', validators = [DataRequired()])
-    #new_password = PasswordField('Новый пароль', validators = [DataRequired()])
-    #repeat_new_password = PasswordField('Повторите пароль', validators = [DataRequired(), EqualTo('password')])
-    #remember_me = BooleanField('Запомнить меня')
     submit = SubmitField('Сохранить изменения')
 
 

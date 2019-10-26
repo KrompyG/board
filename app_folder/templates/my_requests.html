@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1>Запросы пользователя {{ current_user.username }}</h1>
+    <hr>
+    {% for p in products %}
+        <div onclick="window.location=`{{ url_for('show_product', product_id = p.id) }}`">
+            <p>[{{ p.category.name }}] - [{{ p.name }}] - [{{ p.timestamp }}]</p>
+        </div>
+    {% endfor %}
+    <hr>
+    <p><a href="{{ url_for('add_request') }}">Добавить новый запрос</a></p>
+{% endblock %}

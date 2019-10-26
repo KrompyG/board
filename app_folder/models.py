@@ -38,6 +38,7 @@ class Product(db.Model):
     name = db.Column(db.String(64))
     photo_name = db.Column(db.String(256))
     timestamp = db.Column(db.DateTime, index = True, default = datetime.utcnow)
+    status = db.Column(db.Integer)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     category = db.relationship('Category')
@@ -79,7 +80,7 @@ class Product(db.Model):
             self.photo_name = photo_uid_name
             return True
         else:
-            return False        
+            return False
 
 
 # for flask_login
@@ -122,4 +123,4 @@ class Message(db.Model):
     timestamp = db.Column(db.DateTime, default = datetime.utcnow)
 
     def __repr__(self):
-        return '<Message about product_id={} from user_id={}>'.format(self.product_id,self.author_id)
+        return '<Message in dialog {} from user_id={}>'.format(self.dialog_id, self.author_id)

@@ -2,7 +2,9 @@
 
 {% block content %}
     <h1>Привет, {{ current_user.username }}!</h1>
-    <p><a href="{{ url_for('add_product') }}">Добавить новый продукт</a></p>
-    <p><a href="{{ url_for('search_product') }}">Поиск товаров</a></p>
+    <p><a href="{{ url_for('add_offer') }}">Добавить новое предложение</a></p>
+    <p><a href="{{ url_for('add_request') }}">Добавить новый запрос</a></p>
+    <p><a href="{{ url_for('search_offers') }}">Поиск предложений</a></p>
+    <p><a href="{{ url_for('search_requests') }}">Поиск запросов</a></p>
     
 {% endblock %}

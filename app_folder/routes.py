@@ -1,9 +1,10 @@
 import os, requests
 from flask import render_template, flash, redirect, url_for, request
 from app_folder import app
-from app_folder.forms import (Login_form, Add_product_form, Register_form,
-                              Search_form, Edit_profile_form,
-                              Send_message_form)
+from app_folder.forms import (Login_form, Register_form,
+                              Add_offer_form, Add_request_form,
+                              Edit_product_form, Search_form, 
+                              Edit_profile_form, Send_message_form)
 from flask_login import current_user, login_user, logout_user, login_required
 from app_folder.models import User, Product, Message, Dialog
 from werkzeug.urls import url_parse
@@ -54,23 +55,39 @@ def login():
     return render_template('login.html', form = form, vk_url = url)
 
 
-#TODO make another version of photo path
-@app.route('/product', methods=['GET', 'POST'])
-def add_product():
-    form = Add_product_form()
+@app.route('/add_offer', methods=['GET', 'POST'])
+def add_offer():
+    form = Add_offer_form()
     if form.validate_on_submit():
         product = Product(name = form.productname.data,
                           category_id = form.category.data,
-                          user_id = current_user.id)
+                          user_id = current_user.id,
+                          status = app.config['OFFER_STATUS'])
         product.add_photo(form.photo.data)
 
         db.session.add(product)
         db.session.commit()
-        flash('Новый продукт {} успешно добавлен!'.format(
+        flash('Новое предложение {} успешно добавлено!'.format(
             form.productname.data))
         return redirect(url_for('index'))
-    #print(form.errors)
-    return render_template('add_product.html', form = form)
+    return render_template('add_offer.html', form = form)
+
+
+@app.route('/add_request', methods=['GET', 'POST'])
+def add_request():
+    form = Add_request_form()
+    if form.validate_on_submit():
+        product = Product(name = form.productname.data,
+                          category_id = form.category.data,
+                          user_id = current_user.id,
+                          status = app.config['REQUEST_STATUS'])
+
+        db.session.add(product)
+        db.session.commit()
+        flash('Новый запрос {} успешно добавлен!'.format(
+            form.productname.data))
+        return redirect(url_for('index'))
+    return render_template('add_request.html', form = form)
 
 
 @app.route('/register', methods=['GET','POST'])
@@ -98,27 +115,74 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route('/my_offers', methods=['GET', 'POST'])
-@login_required
-def my_offers():
-    products = Product.query.filter_by(owner = current_user).order_by(Product.category_id.asc())
-    return render_template('my_offers.html', products = products, get_path = form_photo_path)
-
-
-@app.route('/search', methods=['GET','POST'])
-def search_product():
+@app.route('/offers', methods=['GET','POST'])
+def search_offers():
     form = Search_form()
     if form.validate_on_submit():        
         products = Product.query.join(Product.owner).filter(
-            (Product.category != None) if (form.category.data == 0) else (Product.category_id == form.category.data),
-            (User.location_id != None) if (form.location.data == 0) else (User.location_id == form.location.data),
-            (Product.name != None) if (form.productname.data == '') else (Product.name == form.productname.data)
+            (Product.category != None) if (form.category.data == 0)
+                else (Product.category_id == form.category.data),
+
+            (User.location_id != None) if (form.location.data == 0)
+                else (User.location_id == form.location.data),
+                
+            (Product.name != None) if (form.productname.data == '')
+                else (Product.name == form.productname.data),
+
+            Product.status == app.config['OFFER_STATUS'] #product offer
         )
-        return render_template('search_form.html', products = products.all(),
+        return render_template('search_offers.html', products = products.all(),
                                 form = form, get_path = form_photo_path)
-    products = Product.query.all()
-    return render_template('search_form.html', products = products,
+    products = Product.query.filter_by(
+        status = app.config['OFFER_STATUS']
+    ).all()
+    return render_template('search_offers.html', products = products,
                             form = form, get_path = form_photo_path)
+
+
+@app.route('/my_offers', methods=['GET', 'POST'])
+@login_required
+def my_offers():
+    products = Product.query.filter_by(
+        owner = current_user,
+        status = app.config['OFFER_STATUS']
+    ).order_by(Product.category_id.asc())
+    return render_template('my_offers.html', products = products, get_path = form_photo_path)
+
+
+@app.route('/requests', methods=['GET','POST'])
+def search_requests():
+    form = Search_form()
+    if form.validate_on_submit():        
+        products = Product.query.join(Product.owner).filter(
+            (Product.category != None) if (form.category.data == 0)
+                else (Product.category_id == form.category.data),
+
+            (User.location_id != None) if (form.location.data == 0)
+                else (User.location_id == form.location.data),
+                
+            (Product.name != None) if (form.productname.data == '')
+                else (Product.name == form.productname.data),
+
+            Product.status == app.config['REQUEST_STATUS'] #product request
+        )
+        return render_template('search_requests.html', products = products.all(),
+                                form = form, get_path = form_photo_path)
+    products = Product.query.filter_by(
+        status = app.config['REQUEST_STATUS']
+    ).all()
+    return render_template('search_requests.html', products = products,
+                            form = form, get_path = form_photo_path)
+
+
+@app.route('/my_requests', methods=['GET', 'POST'])
+@login_required
+def my_requests():
+    products = Product.query.filter_by(
+        owner = current_user,
+        status = app.config['REQUEST_STATUS']
+    ).order_by(Product.category_id.asc())
+    return render_template('my_requests.html', products = products)
 
 
 @app.route('/product/<product_id>')
@@ -145,14 +209,16 @@ def show_product(product_id):
 @app.route('/edit_product/<product_id>', methods=['GET', 'POST'])
 @login_required
 def edit_product(product_id):
-    # for editing product Add_product_form could be used
-    form = Add_product_form()
+    form = Edit_product_form()
     product = Product.query.filter_by(id = product_id).first()
+    #TODO: remove 'has_photo' into Product class
+    has_photo = True if product.status == app.config['OFFER_STATUS'] else False
     if product.owner == current_user:
         if form.validate_on_submit():
             product.name = form.productname.data
             product.category_id = form.category.data
-            product.replace_photo(form.photo.data)
+            if has_photo:
+                product.replace_photo(form.photo.data)
         
             db.session.commit()
             flash('Изменения информации о продукте {} сохранены!'.format(
@@ -162,7 +228,7 @@ def edit_product(product_id):
             form.productname.data = product.name
             form.category.data = product.category_id
         return render_template('edit_product.html', form = form, product = product,
-                                get_path = form_photo_path)
+                                get_path = form_photo_path, has_photo = has_photo)
     return redirect(url_for('show_product', product_id = product_id))
 
 

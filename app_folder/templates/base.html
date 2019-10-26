@@ -11,6 +11,7 @@
                 <a href="{{ url_for('login') }}">Авторизация</a>
             {% else %}
                 <a href="{{ url_for('my_offers') }}">Мои предложения</a>
+                <a href="{{ url_for('my_requests') }}">Мои запросы</a>
                 <a href="{{ url_for('logout') }}">Выход</a>
                 <a href="{{ url_for('edit_profile') }}">Редактировать профиль</a>
             {% endif %}

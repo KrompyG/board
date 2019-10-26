@@ -33,6 +33,7 @@ def upgrade():
     sa.Column('name', sa.String(length=64), nullable=True),
 	sa.Column('photo_name', sa.String(length=256), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
+    sa.Column('status', sa.Integer(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['user.id']),
     sa.Column('category_id', sa.Integer(), nullable=True),

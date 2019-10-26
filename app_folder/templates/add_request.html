@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Добавление товара</h1>
+    <h1>Добавление запроса на товар</h1>
     <form action="" method="POST" enctype="multipart/form-data" novalidate>
         {{ form.hidden_tag }}
         {{ form.csrf_token }}
@@ -19,7 +19,6 @@
             <span style="color: red;">[{{ error }}]</span>
             {% endfor %}
         </p>
-        <p>{{ form.photo() }} {{ form.photo.label }}</p>
         <p>{{ form.submit() }}</p>
     </form>
 {% endblock %}
