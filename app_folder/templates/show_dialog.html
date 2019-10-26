@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1>Диалог с </h1>
+    <div>
+        {% for m in messages %}
+            <div>{{ m.body }}</div>
+        {% endfor %}
+    </div>
+    <br>
+    <form action="" method="POST" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag }}
+        {{ form.csrf_token }}
+        <div>
+            {{ form.textarea }}
+        </div>
+        <div>
+            {{ form.submit }}
+        </div>
+
+    </form>
+
+{% endblock %}

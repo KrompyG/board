@@ -2,14 +2,16 @@ import os, requests
 from flask import render_template, flash, redirect, url_for, request
 from app_folder import app
 from app_folder.forms import (Login_form, Add_product_form, Register_form,
-                              Search_form, Edit_profile_form)
+                              Search_form, Edit_profile_form,
+                              Send_message_form)
 from flask_login import current_user, login_user, logout_user, login_required
-from app_folder.models import User, Product
+from app_folder.models import User, Product, Message, Dialog
 from werkzeug.urls import url_parse
 from werkzeug.utils import secure_filename
 from app_folder import db
 from app_folder.utilits import form_photo_path
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import or_, and_
 
 
 # checking file's extension
@@ -122,8 +124,21 @@ def search_product():
 @app.route('/product/<product_id>')
 def show_product(product_id):
     product = Product.query.filter_by(id = product_id).first()
-    return render_template('product_page.html', product = product,
-                            get_path = form_photo_path)
+    if current_user != product.owner:
+        dialog = Dialog.query.filter_by(
+            product_id = product.id,
+            customer_id = current_user.id
+        ).all() #this query will return only one dialog
+        return render_template('product_page.html', product = product,
+                        get_path = form_photo_path, dialog_list = dialog,
+                        create_dialog = create_dialog)
+    else:
+        dialogs = Dialog.query.filter_by(
+            product_id = product.id
+        ).all()
+        return render_template('product_page.html', product = product,
+                    get_path = form_photo_path, dialog_list = dialogs,
+                    create_dialog = create_dialog)
 
 
 #TODO make another version of photo path
@@ -241,3 +256,34 @@ def add_vk_id():
             pass
     flash('Что-то пошло не так...')
     return redirect(url_for('index'))
+
+
+@app.route('/dialog/<dialog_id>',  methods=['GET', 'POST'])
+@login_required
+def show_dialog(dialog_id):
+    form = Send_message_form()
+    current_dialog = Dialog.query.filter_by(id=dialog_id).first()
+    product_owner = Product.query.filter_by(id=current_dialog.product_id).first().owner
+    if form.validate_on_submit():
+        new_message = Message(
+            dialog_id = dialog_id,
+            author_id = current_user.id,
+            body = form.textarea.data
+        )
+        db.session.add(new_message)
+        db.session.commit()
+        form.textarea.data = ''
+    messages = Message.query.filter_by(
+        dialog_id = dialog_id
+    ).order_by(Message.timestamp)
+    return render_template('show_dialog.html', messages=messages, form=form)
+
+
+def create_dialog(product_id, customer_id):
+    dialog = Dialog(
+        product_id = product_id,
+        customer_id = customer_id
+    )
+    db.session.add(dialog)
+    db.session.commit()
+    return url_for('show_dialog', dialog_id = dialog.id)
