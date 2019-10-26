@@ -21,6 +21,7 @@ class User(UserMixin, db.Model):
     location = db.relationship('Location', backref = 'inhabitants')
     products = db.relationship('Product', backref = 'owner', lazy = 'dynamic')
     messages = db.relationship('Message', backref = 'author')
+    dialogs = db.relationship('Dialog')
 
     def __repr__ (self):
         return '<User {} {} {}>'.format(self.first_name, self.last_name, self.username)
@@ -40,7 +41,7 @@ class Product(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     category = db.relationship('Category')
-    dialogs = db.relationship('Dialog', backref = 'theme')
+    dialogs = db.relationship('Dialog')
 
     def __repr__(self):
         return '<Product {}>'.format(self.name)
@@ -106,18 +107,19 @@ class Location(db.Model):
 class Dialog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'))
-    timestamp = db.Column(db.DateTime, default = datetime.utcnow)
-    
-    def __repr__(self):
-        return '<Dialog about product with id={}'.format(self.product_id)
+    customer_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    messages = db.relationship('Message')
+
+def __repr__(self):
+        return '<Dialog id={}'.format(self.id)
 
 
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    dialog_id = db.Column(db.Integer, db.ForeignKey('dialog.id'), index=True)
+    dialog_id = db.Column(db.Integer, db.ForeignKey('dialog.id'))
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     body = db.Column(db.String(256))
     timestamp = db.Column(db.DateTime, default = datetime.utcnow)
 
     def __repr__(self):
-        return '<Message from user with id={} in {}>'.format(self.author_id, self.timestamp)
+        return '<Message about product_id={} from user_id={}>'.format(self.product_id,self.author_id)
