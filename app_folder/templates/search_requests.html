@@ -3,7 +3,7 @@
 {% block content %}
     <h1>Поиск запросов</h1>
     <form action="" method="POST" novalidate>
-        {{ form.hidden_tag }}
+        {{ form.hidden_tag() }}
         {{ form.csrf_token }}
             <div>
                 {{ form.category }}
