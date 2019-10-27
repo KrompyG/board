@@ -82,6 +82,8 @@ class Product(db.Model):
         else:
             return False
 
+    def get_has_photo(self):
+        return True if self.status == app.config['OFFER_STATUS'] else False
 
 # for flask_login
 @login.user_loader

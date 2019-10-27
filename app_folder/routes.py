@@ -211,13 +211,11 @@ def show_product(product_id):
 def edit_product(product_id):
     form = Edit_product_form()
     product = Product.query.filter_by(id = product_id).first()
-    #TODO: remove 'has_photo' into Product class
-    has_photo = True if product.status == app.config['OFFER_STATUS'] else False
     if product.owner == current_user:
         if form.validate_on_submit():
             product.name = form.productname.data
             product.category_id = form.category.data
-            if has_photo:
+            if product.get_has_photo():
                 product.replace_photo(form.photo.data)
         
             db.session.commit()
@@ -228,7 +226,7 @@ def edit_product(product_id):
             form.productname.data = product.name
             form.category.data = product.category_id
         return render_template('edit_product.html', form = form, product = product,
-                                get_path = form_photo_path, has_photo = has_photo)
+                                get_path = form_photo_path, has_photo = product.get_has_photo())
     return redirect(url_for('show_product', product_id = product_id))
 
 
