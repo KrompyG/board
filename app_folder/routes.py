@@ -5,7 +5,7 @@ from app_folder.forms import (Login_form, Register_form,
                               Add_offer_form, Add_request_form,
                               Edit_product_form, Search_form, 
                               Edit_profile_form, Send_message_form,
-                              Delete_product_form)
+                              Delete_product_form, Create_dialog_form)
 from flask_login import current_user, login_user, logout_user, login_required
 from app_folder.models import User, Product, Message, Dialog
 from werkzeug.urls import url_parse
@@ -196,21 +196,22 @@ def show_product(product_id):
             product_id = product.id,
             customer_id = current_user.id
         ).all() #this query will return only one dialog
+        create_dialog_form = Create_dialog_form()
         return render_template('product_page.html', product = product,
                         get_path = form_photo_path, dialog_list = dialog,
-                        create_dialog = create_dialog)
+                        create_dialog_form = create_dialog_form)
     else: #current_user is product owner
-        form = Delete_product_form()
+        delete_product_form = Delete_product_form()
         if product.status == app.config['OFFER_STATUS']:
-            form.next_page.data = url_for('my_offers')
+            delete_product_form.next_page.data = url_for('my_offers')
         elif product.status == app.config['REQUEST_STATUS']:
-            form.next_page.data = url_for('my_requests')
+            delete_product_form.next_page.data = url_for('my_requests')
         dialogs = Dialog.query.filter_by(
             product_id = product.id
         ).all()
         return render_template('product_page.html', product = product,
                     get_path = form_photo_path, dialog_list = dialogs,
-                    create_dialog = create_dialog, form = form)
+                    create_dialog = create_dialog, delete_product_form = delete_product_form)
 
 
 #TODO make another version of photo path
@@ -350,18 +351,21 @@ def show_dialog(dialog_id):
     ).order_by(Message.timestamp)
     return render_template('show_dialog.html', messages=messages, form=form)
 
-
-def create_dialog(product_id, customer_id):
+@app.route('/create_dialog', methods=['POST'])
+@login_required
+def create_dialog():
+    product_id = int(request.form['product_id'])
+    customer_id = int(request.form['customer_id'])
     dialog = Dialog(
         product_id = product_id,
         customer_id = customer_id
     )
     db.session.add(dialog)
     db.session.commit()
-    return url_for('show_dialog', dialog_id = dialog.id)
+    return redirect(url_for('show_dialog', dialog_id = dialog.id))
 
 
-#validating: POST validate_on_submit
+
 @app.route('/delete_product', methods=['POST'])
 def delete_product():
     id = int(request.form['index'])

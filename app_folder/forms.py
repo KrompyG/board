@@ -93,3 +93,9 @@ class Delete_product_form(FlaskForm):
     next_page = HiddenField('next_page')
     index = HiddenField('index')
     submit = SubmitField('Удалить продукт')
+
+
+class Create_dialog_form(FlaskForm):
+    product_id = HiddenField('product_id')
+    customer_id = HiddenField('customer_id')
+    submit = SubmitField('Создать диалог')    
