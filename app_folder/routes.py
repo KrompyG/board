@@ -4,7 +4,8 @@ from app_folder import app
 from app_folder.forms import (Login_form, Register_form,
                               Add_offer_form, Add_request_form,
                               Edit_product_form, Search_form, 
-                              Edit_profile_form, Send_message_form)
+                              Edit_profile_form, Send_message_form,
+                              Delete_product_form)
 from flask_login import current_user, login_user, logout_user, login_required
 from app_folder.models import User, Product, Message, Dialog
 from werkzeug.urls import url_parse
@@ -143,11 +144,13 @@ def search_offers():
 @app.route('/my_offers', methods=['GET', 'POST'])
 @login_required
 def my_offers():
+    form = Delete_product_form()
     products = Product.query.filter_by(
         owner = current_user,
         status = app.config['OFFER_STATUS']
-    ).order_by(Product.category_id.asc())
-    return render_template('my_offers.html', products = products, get_path = form_photo_path)
+    ).order_by(Product.category_id).all()
+    return render_template('my_offers.html', products = products,
+            get_path = form_photo_path, form = form)
 
 
 @app.route('/requests', methods=['GET','POST'])
@@ -196,13 +199,18 @@ def show_product(product_id):
         return render_template('product_page.html', product = product,
                         get_path = form_photo_path, dialog_list = dialog,
                         create_dialog = create_dialog)
-    else:
+    else: #current_user is product owner
+        form = Delete_product_form()
+        if product.status == app.config['OFFER_STATUS']:
+            form.next_page.data = url_for('my_offers')
+        elif product.status == app.config['REQUEST_STATUS']:
+            form.next_page.data = url_for('my_requests')
         dialogs = Dialog.query.filter_by(
             product_id = product.id
         ).all()
         return render_template('product_page.html', product = product,
                     get_path = form_photo_path, dialog_list = dialogs,
-                    create_dialog = create_dialog)
+                    create_dialog = create_dialog, form = form)
 
 
 #TODO make another version of photo path
@@ -351,3 +359,24 @@ def create_dialog(product_id, customer_id):
     db.session.add(dialog)
     db.session.commit()
     return url_for('show_dialog', dialog_id = dialog.id)
+
+
+#validating: POST validate_on_submit
+@app.route('/delete_product', methods=['POST'])
+def delete_product():
+    id = int(request.form['index'])
+    next_page = request.form['next_page']
+    product = Product.query.filter_by(id = id).first()
+    if product:
+        product.delete_photo()
+        for dialog in product.dialogs:
+            db.session.delete(dialog)
+        db.session.delete(product)
+        db.session.commit()
+        flash('Продукт успешно удалён')
+    else:
+        flash('Данного продукта не существует')
+    # if next_page has absolute path (unsecure)
+    if (url_parse(next_page).netloc != ''):
+        next_page = url_for('index')
+    return redirect(next_page)

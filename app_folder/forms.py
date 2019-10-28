@@ -3,7 +3,7 @@
 from flask_wtf import FlaskForm
 from wtforms.fields import (StringField, PasswordField, BooleanField,
                             SubmitField, SelectField, FileField,
-                            TextAreaField)
+                            TextAreaField, HiddenField)
 from wtforms.validators import (DataRequired, Required, ValidationError,
                                 Email, EqualTo)
 from app_folder.models import User, Category, Location
@@ -87,3 +87,9 @@ class Edit_profile_form(FlaskForm):
 class Send_message_form(FlaskForm):
     textarea = TextAreaField(validators=[DataRequired()])
     submit = SubmitField('Отправить')
+
+
+class Delete_product_form(FlaskForm):
+    next_page = HiddenField('next_page')
+    index = HiddenField('index')
+    submit = SubmitField('Удалить продукт')

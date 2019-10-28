@@ -7,7 +7,7 @@
             {% if product.photo_name %}
                 <img src="{{ get_path(product.photo_name) }}" alt="{{ product.name }}">
             {% endif %}
-
+            
 
             <div>
                 {% if current_user == product.owner %}
@@ -21,6 +21,12 @@
                         </div>
                         {% endfor %}
                     </div>
+                    <form action="{{ url_for('delete_product') }}" method="POST">
+                        {{ form.csrf_token() }}
+                        {{ form.next_page }}
+                        {{ form.index(value=product.id) }}
+                        {{ form.submit }}
+                    </form>
                 {% elif not current_user.is_anonymous %}
                     {% if not dialog_list %}<!--if dialog_list is empty we will create one-->
                         <a href="{{ create_dialog(product_id = product.id, customer_id = current_user.id) }}">Перейти к диалогу</a>
