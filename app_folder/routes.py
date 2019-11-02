@@ -70,7 +70,7 @@ def add_offer():
         db.session.commit()
         flash('Новое предложение {} успешно добавлено!'.format(
             form.productname.data))
-        return redirect(url_for('index'))
+        return redirect(url_for('my_offers'))
     return render_template('add_offer.html', form = form)
 
 
@@ -87,7 +87,7 @@ def add_request():
         db.session.commit()
         flash('Новый запрос {} успешно добавлен!'.format(
             form.productname.data))
-        return redirect(url_for('index'))
+        return redirect(url_for('my_requests'))
     return render_template('add_request.html', form = form)
 
 
@@ -374,6 +374,8 @@ def delete_product():
     if product:
         product.delete_photo()
         for dialog in product.dialogs:
+            for message in dialog.messages:
+                db.session.delete(message)
             db.session.delete(dialog)
         db.session.delete(product)
         db.session.commit()
