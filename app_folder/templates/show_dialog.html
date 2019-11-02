@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Диалог с </h1>
+    <h1>Диалог с {{ interlocutor.first_name + ' ' + interlocutor.last_name }}</h1>
+    <div>
+        <a href="{{ url_for('show_product', product_id=product.id) }}">
+            Перейти на страницу продукта
+        </a>
+    </div>
     <div>
         {% for m in messages %}
             <div>{{ m.body }}</div>

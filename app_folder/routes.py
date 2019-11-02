@@ -337,6 +337,15 @@ def show_dialog(dialog_id):
     form = Send_message_form()
     current_dialog = Dialog.query.filter_by(id=dialog_id).first()
     product_owner = Product.query.filter_by(id=current_dialog.product_id).first().owner
+    customer = User.query.filter_by(id=current_dialog.customer_id).first()
+    if current_user == product_owner:
+        interlocutor = customer
+    elif current_user == customer:
+        interlocutor = product_owner
+    else:
+        flash('Отказано в доступе')
+        return redirect(url_for('index'))
+    product = Product.query.filter_by(id=current_dialog.product_id).first()
     if form.validate_on_submit():
         new_message = Message(
             dialog_id = dialog_id,
@@ -349,7 +358,13 @@ def show_dialog(dialog_id):
     messages = Message.query.filter_by(
         dialog_id = dialog_id
     ).order_by(Message.timestamp)
-    return render_template('show_dialog.html', messages=messages, form=form)
+    return render_template(
+        'show_dialog.html',
+        messages = messages,
+        form = form,
+        interlocutor = interlocutor,
+        product = product
+    )
 
 @app.route('/create_dialog', methods=['POST'])
 @login_required
