@@ -14,6 +14,7 @@ from app_folder import db
 from app_folder.utilits import form_photo_path
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy import or_, and_
+from sqlalchemy.sql import func
 
 
 # checking file's extension
@@ -350,14 +351,24 @@ def show_dialog(dialog_id):
         new_message = Message(
             dialog_id = dialog_id,
             author_id = current_user.id,
-            body = form.textarea.data
+            body = form.textarea.data,
+            seen = False
         )
         db.session.add(new_message)
         db.session.commit()
         form.textarea.data = ''
     messages = Message.query.filter_by(
         dialog_id = dialog_id
-    ).order_by(Message.timestamp)
+    )
+    # make messages seen
+    messages.filter(
+        Message.seen == False,
+        Message.author_id != current_user.id # when current_user is a recipient
+    ).update({'seen': True})
+    db.session.commit()
+
+    # order messages for output
+    messages.order_by(Message.timestamp)
     return render_template(
         'show_dialog.html',
         messages = messages,
@@ -365,6 +376,34 @@ def show_dialog(dialog_id):
         interlocutor = interlocutor,
         product = product
     )
+
+
+@app.route('/dialog_list')
+@login_required
+def show_dialog_list():
+    subq = db.session.query(
+        Message.dialog_id.label('d_id'),
+        Message.id.label('m_id')
+    ).filter(
+        Message.seen == False,
+        Message.author_id != current_user.id
+    ).subquery()
+    # query for getting dialogs of current_user and count of unseen messages
+    q = db.session.query(
+            Dialog.id,
+            func.count(subq.c.m_id)
+        ).outerjoin(subq, subq.c.m_id == Message.id).filter(
+            Dialog.id == Message.dialog_id,
+            Dialog.product_id == Product.id,
+            or_(
+                Product.user_id == current_user.id,
+                Dialog.customer_id == current_user.id
+            )
+        ).group_by(Dialog.id).order_by(func.max(Message.timestamp).desc())
+    
+    #print(str(q))
+    return render_template('dialog_list.html', result = q.all())
+
 
 @app.route('/create_dialog', methods=['POST'])
 @login_required
