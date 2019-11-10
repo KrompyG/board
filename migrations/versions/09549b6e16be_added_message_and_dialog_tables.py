@@ -31,6 +31,7 @@ def upgrade():
     sa.Column('dialog_id', sa.Integer(), nullable=True),
     sa.Column('author_id', sa.Integer(), nullable=True),
     sa.Column('body', sa.String(length=256), nullable=True),
+    sa.Column('seen', sa.Integer(), nullable=True)
     sa.Column('timestamp', sa.DateTime(), nullable=True),
     sa.ForeignKeyConstraint(['author_id'], ['user.id'], ),
     sa.ForeignKeyConstraint(['dialog_id'], ['dialog.id'], ),

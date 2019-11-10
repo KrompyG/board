@@ -122,6 +122,7 @@ class Message(db.Model):
     dialog_id = db.Column(db.Integer, db.ForeignKey('dialog.id'))
     author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     body = db.Column(db.String(256))
+    seen = db.Column(db.Boolean)
     timestamp = db.Column(db.DateTime, default = datetime.utcnow)
 
     def __repr__(self):
